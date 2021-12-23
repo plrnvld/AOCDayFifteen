@@ -37,22 +37,31 @@ function get_risk(x: number, y: number): number {
 }
 
 function find_path(): Vertex | null {
-    let vertices: Set<Vertex> = new Set();
-
+    let original_vertices: Set<Vertex> = new Set();
+   
     data.forEach((line, y) => {
         for (var x = 0; x < line.length; x++) {
-            vertices.add(new Vertex(x, y, get_risk(x, y)));
+            original_vertices.add(new Vertex(x, y, get_risk(x, y)));
         }
     });
+
+    let vertices = enlarge_map(original_vertices);
+
+    console.log(`Map enlarged, now: ${vertices.size} vertices.` );
 
     let source = find_vertex(0, 0);
     if (source) {
         source.dist = 0;
     }
 
-    let target = find_vertex(99, 99);
+    let target = find_vertex(499, 499);
 
     while (vertices.size !== 0) {
+        if (vertices.size % 200 === 0) {
+            let percentage = (100 - (100 * vertices.size / 250000));
+            console.log(`Progress ${ Math.round(percentage * 10) / 10 } %`);
+        }
+
         let u = find_min_distance_vertex();
         vertices.delete(u);
 
@@ -69,6 +78,7 @@ function find_path(): Vertex | null {
             }
         }
     }
+    
 
     function find_min_distance_vertex(): Vertex {
         let first_vertex = vertices.values().next().value;
@@ -116,6 +126,43 @@ function find_path(): Vertex | null {
     }
 
     return null;
+}
+
+function enlarge_map(vertices: Set<Vertex>): Set<Vertex> {
+    let new_map: Set<Vertex> = new Set();
+
+    for (let v of vertices) {
+        for (let d of get_vertex_duplicates(v)) {
+            new_map.add(d);
+        }
+    }
+
+    function get_vertex_duplicates(vertex: Vertex) {
+        let duplicates: Array<Vertex> = [];
+        let original_risk = vertex.risk;
+
+        duplicates.push(vertex);
+
+        for (var y = 0; y < 5; y++) { 
+            for (var x = 0; x < 5; x++) {
+                if (!(x === 0 && y === 0)) {
+                    let new_x = x * 100 + x;
+                    let new_y = y * 100 + y;
+                    let risk_addition = x + y;
+                    var new_risk = original_risk + risk_addition;
+                    if (new_risk > 9) {
+                        new_risk -= 9;
+                    }
+
+                    duplicates.push(new Vertex(new_x, new_y, new_risk));
+                }
+            }
+        }      
+
+        return duplicates;
+    }
+
+    return new_map;
 }
 
 class Vertex {
