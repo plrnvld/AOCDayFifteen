@@ -146,8 +146,8 @@ function enlarge_map(vertices: Set<Vertex>): Set<Vertex> {
         for (var y = 0; y < 5; y++) { 
             for (var x = 0; x < 5; x++) {
                 if (!(x === 0 && y === 0)) {
-                    let new_x = x * 100 + x;
-                    let new_y = y * 100 + y;
+                    let new_x = x * 100 + vertex.x;
+                    let new_y = y * 100 + vertex.y;
                     let risk_addition = x + y;
                     var new_risk = original_risk + risk_addition;
                     if (new_risk > 9) {
